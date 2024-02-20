@@ -5,6 +5,7 @@
 #define DEFAULT_EPSILON 0.001
 #define DEFAULT_ITERATION 200
 #define MAX_ITERATION 1000
+#define INFINITY1 (__builtin_inf())
 
 double **vectors;
 double **centroids;
@@ -14,11 +15,11 @@ int *centroid_size;
 double distance(double *v, double *u, int d);
 int assert_input(int x, char *input);
 int init_vector_list(int d, int N);
-int init_centroids(int k, int d, int n);
+int init_centroids(int k, int d);
 int find_closest_centroid_index(double *curr, int k, int d);
 void print_centroids(int k, int d);
 void calculate_updated_centroid(int centroid_idx, int x, int d);
-void calculate_mean(int k, int i, int d);
+void calculate_mean(int i, int d);
 void reset_new_centroids(int i, int d);
 int k_means(int k, int n, int d, int max_iter);
 void free_memory(int K, int d);
@@ -36,7 +37,8 @@ double distance(double *v, double *u, int d)
 
 int assert_input(int x, char *input)
 {
-    int i;
+
+    int i, j;
     for (i = 0; input[i] != '\0'; i++)
     {
         char curr = input[i];
@@ -61,7 +63,8 @@ int assert_input(int x, char *input)
             return 0;
         }
     }
-    int j = atoi(input);
+
+    j = atoi(input);
     if (x == 'k' && j <= 1)
     {
         printf("Invalid number of clusters!\n");
@@ -112,7 +115,7 @@ int init_vector_list(int d, int N)
     return 0;
 }
 
-int init_centroids(int k, int d, int n)
+int init_centroids(int k, int d)
 {
     int i, j;
     centroids = (double **)malloc(k * sizeof(double *));
@@ -133,7 +136,7 @@ int init_centroids(int k, int d, int n)
             printf("An Error Has Occurred\n");
             return 1;
         }
-        for (int j = 0; j < d; j++)
+        for (j = 0; j < d; j++)
         {
             centroids[i][j] = vectors[i][j];
         }
@@ -148,7 +151,7 @@ int init_centroids(int k, int d, int n)
 int find_closest_centroid_index(double *curr, int k, int d)
 {
     int i;
-    double closest_d = INFINITY;
+    double closest_d = INFINITY1;
     int closest_centroid_index = -1;
 
     for (i = 0; i < k; i++)
@@ -189,7 +192,7 @@ void calculate_updated_centroid(int centroid_idx, int x, int d)
     }
     centroid_size[centroid_idx]++;
 }
-void calculate_mean(int k, int i, int d)
+void calculate_mean(int i, int d)
 {
     int j;
     for (j = 0; j < d; j++)
@@ -227,7 +230,7 @@ int k_means(int k, int n, int d, int max_iter)
 
         for (y = 0; y < k; y++)
         {
-            calculate_mean(k, y, d);
+            calculate_mean(y, d);
             curr_miu = distance(centroids[y], new_centroids[y], d);
             delta_miu = (curr_miu > delta_miu) ? curr_miu : delta_miu;
             reset_new_centroids(y, d);
@@ -258,6 +261,10 @@ void free_memory(int K, int d)
 
 int main(int argc, char *argv[])
 {
+    int iter;
+    int K;
+    int N;
+    int d;
 
     if (argc < 4 || argc > 5)
     {
@@ -265,24 +272,23 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int iter, c;
-    int K = assert_input('k', argv[1]);
+    K = assert_input('k', argv[1]);
     if (K == 0)
     {
         return 1;
     }
-    int N = assert_input('n', argv[2]);
+    N = assert_input('n', argv[2]);
     if (N == 0)
     {
         return 1;
     }
-    int d = assert_input('d', argv[3]);
+    d = assert_input('d', argv[3]);
     if (d == 0)
     {
         return 1;
     }
     iter = DEFAULT_ITERATION;
-    if (argc == 6)
+    if (argc == 5)
     { /* We got an iteration number */
         iter = assert_input('i', argv[4]);
         if (iter == 0)
@@ -303,7 +309,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if ((init_centroids(K, d, N)) == 1)
+    if ((init_centroids(K, d)) == 1)
     {
 
         return 1;

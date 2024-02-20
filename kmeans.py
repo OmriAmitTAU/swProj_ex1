@@ -1,5 +1,20 @@
 import sys
-import math
+
+
+class InputError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return f"{self.message}"
+
+
+def euclidean_distance(vec1, vec2):
+    d = 0
+    for x1, x2 in zip(vec1, vec2):
+        d_single = (x1 - x2) ** 2
+        d += d_single
+    return d ** 0.5
 
 
 def is_natural(num):
@@ -19,17 +34,13 @@ def parse_input():
 
 def assert_input(k, n, d, max_iter):
     if not (n > 1 and is_natural(n)):
-        print("Invalid number of points!")
-        return False
+        raise InputError("Invalid number of points!")
     if not (1 < k < n and is_natural(k)):
-        print("Invalid number of clusters!")
-        return False
+        raise InputError("Invalid number of clusters!")
     if not (is_natural(d)):
-        print("Invalid dimension of point!")
-        return False
+        raise InputError("Invalid dimension of point!")
     if not (1 < max_iter < 1000 and is_natural(max_iter)):
-        print("Invalid maximum iteration!")
-        return False
+        raise InputError("Invalid maximum iteration!")
     return True
 
 
@@ -44,11 +55,11 @@ def init_vector_list(input_data):
 
 
 def find_closest_centroid(curr, k_centroids):
-    closest_d = math.inf
+    closest_d = float("inf")
     closest_centroid = None
 
     for centroid in k_centroids.keys():
-        distance = math.dist(curr, centroid)
+        distance = euclidean_distance(curr, centroid)
         if distance < closest_d:
             closest_d = distance
             closest_centroid = centroid
@@ -82,7 +93,7 @@ def k_means(k, n, d, input_data, max_iter=200):
     k_centroids = {datapoints[i]: [datapoints[i]] for i in range(k)}
     vectors_mapping = {vector: vector if vector in k_centroids.keys() else None for vector in datapoints}
     i = 0
-    delta_miu = math.inf
+    delta_miu = float("inf")
     while delta_miu >= e or i < max_iter:
         assign_to_closest_centroid(datapoints, k_centroids, vectors_mapping)
         new_k_centroids = dict()
@@ -91,7 +102,7 @@ def k_means(k, n, d, input_data, max_iter=200):
             new_k_centroids[updated_centroid] = k_centroids[curr_centroid]  # change to new centroid
             for vector in new_k_centroids[updated_centroid]:
                 vectors_mapping[vector] = updated_centroid
-            delta_miu = min(math.dist(curr_centroid, updated_centroid), delta_miu)
+            delta_miu = min(euclidean_distance(curr_centroid, updated_centroid), delta_miu)
         k_centroids = new_k_centroids
 
         i += 1
@@ -106,8 +117,10 @@ def main():
         k, n, d, max_iter = map(int, parse_input())
         input_file = sys.argv[-1]
         k_means(k, n, d, input_file, max_iter)
-    except:
-        print("An Error Has Occurred")
+    except InputError as e:
+        print(e)
+    except Exception:
+        print("An Error Has Occurred!")
 
 
 if __name__ == "__main__":

@@ -25,8 +25,9 @@ void free_memory(int K, int d);
 
 double distance(double *v, double *u, int d)
 {
+    int i;
     double add = 0.0;
-    for (int i = 0; i < d; i++)
+    for (i = 0; i < d; i++)
     {
         add += pow((v[i] - u[i]), 2);
     }
@@ -81,6 +82,7 @@ int assert_input(int x, char *input)
 
 int init_vector_list(int d, int N)
 {
+    int x, y;
     vectors = (double **)malloc((N * sizeof(double *)));
     if (vectors == NULL)
     {
@@ -88,7 +90,7 @@ int init_vector_list(int d, int N)
         return 1;
     }
 
-    for (int x = 0; x < N; x++)
+    for (x = 0; x < N; x++)
     {
         vectors[x] = (double *)malloc((d * sizeof(double *)));
         if (vectors[x] == NULL)
@@ -97,7 +99,7 @@ int init_vector_list(int d, int N)
             return 1;
         }
 
-        for (int y = 0; y < d; y++)
+        for (y = 0; y < d; y++)
         {
             if ((scanf("%lf,", &vectors[x][y])) != 1)
             {
@@ -112,6 +114,7 @@ int init_vector_list(int d, int N)
 
 int init_centroids(int k, int d, int n)
 {
+    int i, j;
     centroids = (double **)malloc(k * sizeof(double *));
     new_centroids = (double **)malloc(k * sizeof(double *));
     centroid_size = (int *)malloc(k * sizeof(int));
@@ -120,7 +123,7 @@ int init_centroids(int k, int d, int n)
         printf("An Error Has Occurred\n");
         return 1;
     }
-    for (int i = 0; i < k; i++)
+    for (i = 0; i < k; i++)
     {
         centroids[i] = (double *)malloc(d * sizeof(double));
         new_centroids[i] = (double *)malloc(d * sizeof(double));
@@ -144,10 +147,11 @@ int init_centroids(int k, int d, int n)
  */
 int find_closest_centroid_index(double *curr, int k, int d)
 {
+    int i;
     double closest_d = INFINITY;
     int closest_centroid_index = -1;
 
-    for (int i = 0; i < k; i++)
+    for (i = 0; i < k; i++)
     {
         double dis = distance(curr, centroids[i], d);
         if (dis < closest_d)
@@ -161,9 +165,10 @@ int find_closest_centroid_index(double *curr, int k, int d)
 
 void print_centroids(int k, int d)
 {
-    for (int i = 0; i < k; i++)
+    int i, j;
+    for (i = 0; i < k; i++)
     {
-        for (int j = 0; j < d; j++)
+        for (j = 0; j < d; j++)
         {
             printf("%.4f", centroids[i][j]);
             if (j < d - 1)
@@ -177,7 +182,8 @@ void print_centroids(int k, int d)
 
 void calculate_updated_centroid(int centroid_idx, int x, int d)
 {
-    for (int i = 0; i < d; i++)
+    int i;
+    for (i = 0; i < d; i++)
     {
         new_centroids[centroid_idx][i] += vectors[x][i];
     }
@@ -185,7 +191,8 @@ void calculate_updated_centroid(int centroid_idx, int x, int d)
 }
 void calculate_mean(int k, int i, int d)
 {
-    for (int j = 0; j < d; j++)
+    int j;
+    for (j = 0; j < d; j++)
     {
 
         double mean = (new_centroids[i][j]) / (centroid_size[i]);
@@ -194,7 +201,8 @@ void calculate_mean(int k, int i, int d)
 }
 void reset_new_centroids(int i, int d)
 {
-    for (int x = 0; x < d; x++)
+    int x;
+    for (x = 0; x < d; x++)
     {
         centroids[i][x] = new_centroids[i][x];
         new_centroids[i][x] = 0.0;
@@ -204,20 +212,20 @@ void reset_new_centroids(int i, int d)
 
 int k_means(int k, int n, int d, int max_iter)
 {
-    int iter = 0;
+    int i, y, iter = 0;
     double delta_miu = INFINITY;
     double curr_miu;
 
     while (delta_miu >= DEFAULT_EPSILON && iter < max_iter)
     {
         delta_miu = distance(centroids[0], new_centroids[0], d);
-        for (int i = 0; i < n; i++)
+        for (i = 0; i < n; i++)
         {
             int curr_idx = find_closest_centroid_index(vectors[i], k, d);
             calculate_updated_centroid(curr_idx, i, d);
         }
 
-        for (int y = 0; y < k; y++)
+        for (y = 0; y < k; y++)
         {
             calculate_mean(k, y, d);
             curr_miu = distance(centroids[y], new_centroids[y], d);
@@ -233,7 +241,8 @@ int k_means(int k, int n, int d, int max_iter)
 
 void free_memory(int K, int d)
 {
-    for (int x = 0; x < d; x++)
+    int x;
+    for (x = 0; x < d; x++)
     {
         free(vectors[x]);
         if (x < K)

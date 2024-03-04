@@ -1,8 +1,8 @@
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 
 double dist(double *vector1, double *vector2, int d);
 int *tag(double **data, double **centroids, int n, int K, int d);
